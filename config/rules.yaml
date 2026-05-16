@@ -1,0 +1,106 @@
+# Voting rules and branding for the department adopting this app.
+# Edit this file to customize. No code changes required for most adaptations.
+
+# Branding shown in the top bar and used as the accent color.
+branding:
+  app_name: "MIE Voting"
+  primary_color: "#881c1c"          # UMass red. Pick your unit's brand color.
+  footer_note: "UMass MIE  internal use  ballots stored in department SharePoint"
+
+# Faculty status sheet columns, left to right. The rightmost is the "active AY"
+# (the year being composed in the next vote). Add a new entry each year.
+ay_columns:
+  - "AY 21-22"
+  - "AY 22-23"
+  - "AY 23-24"
+  - "AY 24-25"
+  - "AY 25-26"
+  - "AY 26-27"
+
+# Per-faculty status codes used in the status sheet. Each code has a display
+# label and indicates whether the holder is hard-excluded from being on the
+# ballot for the active AY.
+#
+# Hard-excluded means: greyed out, not selectable on a composition or
+# nomination ballot, vote system rejects any selection of them. Use this for
+# statuses that genuinely prevent service (e.g. has own T/P case, is in an
+# admin role, is on sabbatical).
+#
+# Non-excluded means: informational only, shows in history panel, still
+# selectable. Use for statuses like "served previously" that don't prevent
+# future service.
+statuses:
+  ADMIN:           { label: "Admin",            hard_exclude: true,  aliases: ["admin"] }
+  GPD:             { label: "GPD",              hard_exclude: true,  aliases: ["gpd"] }
+  UPD:             { label: "UPD",              hard_exclude: true,  aliases: ["upd"] }
+  CPC_REP:         { label: "CPC Rep",          hard_exclude: true,  aliases: ["cpc", "cpc rep"] }
+  TP_CASE:         { label: "T/P Case",         hard_exclude: true,  aliases: ["t/p case", "tp case"] }
+  NA:              { label: "N/A",              hard_exclude: true,  aliases: ["n/a", "na"] }
+  SABBATICAL:      { label: "Sabbatical",       hard_exclude: true,  aliases: ["sabbatical"] }
+  NOT_YET_FACULTY: { label: "Not yet faculty",  hard_exclude: true,  aliases: ["not yet faculty"] }
+  FIRST_YEAR:      { label: "First year",       hard_exclude: true,  aliases: ["first year"] }
+  SPLIT_APPT:      { label: "Split appt",       hard_exclude: true,  aliases: ["split appt", "split appointment"] }
+  SERVED:          { label: "Served",           hard_exclude: false, aliases: ["served"] }
+  CHAIR:           { label: "Chair",            hard_exclude: false, aliases: ["chair", "dpc chair"] }
+  NON_VOTING:      { label: "Non-voting",       hard_exclude: false, aliases: ["non-voting", "non voting"] }
+  ALTERNATE:       { label: "Alternate",        hard_exclude: false, aliases: ["alternate"] }
+  DID_NOT_SERVE:   { label: "Did not serve",    hard_exclude: false, aliases: ["did not serve"] }
+
+# Name aliases: short names in the status sheet -> canonical full name in the
+# faculty CSV. Most faculty resolve by first-name match; this is only for
+# disambiguation (two Stephens) and nicknames (Matt for Matthew).
+name_aliases:
+  Leo: "Tingyi Leo Liu"
+  Matt: "Matthew Lackner"
+  Stephen: "Stephen S. Nonnenmann"
+  Steve dBK: "Stephen de Bruyn Kops"
+
+# Election templates. Each one is a preset on the New Vote page.
+#
+# ballot_type: yes_no | approval | ranked
+# candidate_filter: none | tenured | untenured | tenure_track
+#   Restricts the candidate pool by rank-based eligibility.
+# seats: number of winners (ranked only).
+# max_ranks: how many candidates a voter can rank (ranked only).
+# quorum_fraction: minimum participation required if require_quorum is true.
+templates:
+  general_motion:
+    label: "General motion (Yes / No / Abstain)"
+    description: "A simple motion. Each voter chooses Yes, No, or Abstain."
+    ballot_type: "yes_no"
+  dpc_nomination_tenured:
+    label: "DPC nomination  tenured seats"
+    description: "Approval ballot. Candidates are tenured faculty (Associate Professor or Professor)."
+    ballot_type: "approval"
+    candidate_filter: "tenured"
+  dpc_nomination_untenured:
+    label: "DPC nomination  untenured seats"
+    description: "Approval ballot. Candidates are Assistant Professors."
+    ballot_type: "approval"
+    candidate_filter: "untenured"
+  dpc_composition_tenured:
+    label: "DPC composition  tenured (5 seats)"
+    description: "Ranked-choice ballot to fill 5 tenured seats."
+    ballot_type: "ranked"
+    seats: 5
+    max_ranks: 5
+    candidate_filter: "tenured"
+    require_quorum: true
+  dpc_composition_untenured:
+    label: "DPC composition  untenured (up to 2 seats)"
+    description: "Ranked-choice ballot to fill up to 2 untenured seats."
+    ballot_type: "ranked"
+    seats: 2
+    max_ranks: 2
+    candidate_filter: "untenured"
+    require_quorum: true
+  custom_ranked:
+    label: "Custom  ranked choice"
+    description: "Pick the candidate pool and number of seats yourself."
+    ballot_type: "ranked"
+    seats: 1
+    max_ranks: 5
+  custom_approval:
+    label: "Custom  approval"
+    description: "Pick any subset of candidates."
+    ballot_type: "approval"

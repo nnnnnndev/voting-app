@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Votes</h1>
+{% if voter %}
+  <p><a class="btn primary" href="/elections/new">+ New vote</a></p>
+{% else %}
+  <p class="muted">Sign in to create a vote or cast one.</p>
+{% endif %}
+
+{% if dpc_cards.served or dpc_cards.alternate or dpc_cards.non_voting %}
+<details class="dpc-panel">
+  <summary>
+    <b>Current DPC</b>
+    {% if active_ay %}<span class="muted">({{ active_ay }})</span>{% endif %}
+    &middot;
+    {{ dpc_cards.served|length }} member{{ 's' if dpc_cards.served|length != 1 else '' }}
+    {% if dpc_cards.alternate %}
+      + {{ dpc_cards.alternate|length }} alternate{{ 's' if dpc_cards.alternate|length != 1 else '' }}
+    {% endif %}
+    {% if dpc_cards.non_voting %}
+      + {{ dpc_cards.non_voting|length }} non-voting
+    {% endif %}
+  </summary>
+
+  {% if dpc_cards.served %}
+    <h3 class="dpc-role">Voting members</h3>
+    <div class="faculty-grid">
+      {% for c in dpc_cards.served %}
+        {% include "_card.html" %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if dpc_cards.non_voting %}
+    <h3 class="dpc-role">Non-voting</h3>
+    <div class="faculty-grid">
+      {% for c in dpc_cards.non_voting %}
+        {% include "_card.html" %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if dpc_cards.alternate %}
+    <h3 class="dpc-role">Alternate</h3>
+    <div class="faculty-grid">
+      {% for c in dpc_cards.alternate %}
+        {% include "_card.html" %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</details>
+{% endif %}
+
+<h2>Open</h2>
+{% if open_elections %}
+  {% for e in open_elections %}
+  <div class="card election-row">
+    <div>
+      <div><a href="/elections/{{ e.id }}"><b>{{ e.title }}</b></a></div>
+      <div class="meta">
+        <span class="tag open">open</span>
+        {{ {'yes_no':'Yes / No','approval':'Approval','ranked':'Ranked choice'}[e.ballot_type] }}
+        {% if e.ballot_type == 'ranked' %} &middot; {{ e.seats }} seat{{ 's' if e.seats != 1 else '' }}{% endif %}
+      </div>
+    </div>
+    <a class="btn" href="/elections/{{ e.id }}">Open &rarr;</a>
+  </div>
+  {% endfor %}
+{% else %}
+  <p class="muted">No open votes.</p>
+{% endif %}
+
+<h2>Closed</h2>
+{% if closed_elections %}
+  {% for e in closed_elections %}
+  <div class="card election-row">
+    <div>
+      <div><a href="/elections/{{ e.id }}"><b>{{ e.title }}</b></a></div>
+      <div class="meta">
+        <span class="tag closed">closed</span>
+        {{ {'yes_no':'Yes / No','approval':'Approval','ranked':'Ranked choice'}[e.ballot_type] }}
+      </div>
+    </div>
+    <a class="btn ghost" href="/elections/{{ e.id }}">Result &rarr;</a>
+  </div>
+  {% endfor %}
+{% else %}
+  <p class="muted">No closed votes.</p>
+{% endif %}
+{% endblock %}

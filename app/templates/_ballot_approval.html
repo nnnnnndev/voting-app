@@ -1,0 +1,11 @@
+<form id="approval-form" method="post" action="/elections/{{ election.id }}/vote">
+  <h2>Select any candidates you approve</h2>
+  <p class="muted small">Click cards to toggle. <span class="approval-note">0 selected</span></p>
+  <div class="faculty-grid">
+    {% for c in candidates %}
+      {% include "_card.html" %}
+    {% endfor %}
+  </div>
+  <input type="hidden" name="approved" value="">
+  <p><button class="btn primary" type="submit">Cast vote</button></p>
+</form>

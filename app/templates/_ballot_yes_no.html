@@ -1,0 +1,10 @@
+<form id="yes-no-form" method="post" action="/elections/{{ election.id }}/vote">
+  <h2>Your vote</h2>
+  <div class="choices">
+    <div class="choice" data-value="yes">Yes</div>
+    <div class="choice" data-value="no">No</div>
+    <div class="choice" data-value="abstain">Abstain</div>
+  </div>
+  <input type="hidden" name="choice" value="" required>
+  <p><button class="btn primary" type="submit">Cast vote</button></p>
+</form>

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>New vote</h1>
+<form method="post" action="/elections/new" enctype="multipart/form-data" id="new-vote-form">
+  <label class="field">
+    <span class="lbl">Template</span>
+    <select name="template_id" id="template-select" required>
+      {% for t in templates %}
+        <option value="{{ t.id }}"
+          {% if t.id == default_template %}selected{% endif %}>{{ t.label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label class="field">
+    <span class="lbl">Title</span>
+    <input type="text" name="title" required maxlength="200"
+           placeholder="e.g. DPC composition — tenured seats, AY 2026-27">
+  </label>
+
+  <label class="field">
+    <span class="lbl">Description (optional)</span>
+    <textarea name="description" rows="3" maxlength="2000"
+              placeholder="Any context faculty should see before voting."></textarea>
+  </label>
+
+  {% if parent %}
+    <div class="banner ok small">
+      Candidate pool will be inherited from
+      <b>{{ parent.title }}</b> (top approvals).
+      <input type="hidden" name="parent_election_id" value="{{ parent.id }}">
+      <input type="hidden" name="candidate_oids" value="{{ inherited_candidate_ids|join(',') }}">
+    </div>
+  {% else %}
+    {# Custom-template candidate builder, shown only when template is custom_*. #}
+    <div id="custom-pool" style="display:none">
+      <h2>Candidate pool</h2>
+      <p class="muted small">
+        Pick faculty to include and/or add external candidates below.
+      </p>
+
+      <details>
+        <summary><b>Faculty</b> &middot; <span class="muted small">click to expand</span></summary>
+        <div class="faculty-grid" style="margin-top:0.5rem">
+          {% for m in all_faculty %}
+            <label class="fcard" style="cursor:pointer">
+              <input type="checkbox" name="faculty_candidate_oids" value="{{ m.id }}"
+                     style="margin:0 0.5rem 0 0;width:auto">
+              {% if m.photo %}
+                <img class="photo" src="/photos/{{ m.photo }}" alt="">
+              {% else %}
+                <div class="bubble">{{ m.initials }}</div>
+              {% endif %}
+              <div class="body">
+                <div class="name">{{ m.name }}</div>
+                <div class="rank muted small">{{ m.rank }}</div>
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+      </details>
+
+      <h3 style="margin-top:1rem">External candidates</h3>
+      <p class="muted small">
+        Useful for hiring searches and other guests. Photos are stored only
+        with this vote and can be purged after results are disseminated.
+      </p>
+      <div id="extras-container"></div>
+      <p>
+        <button type="button" class="btn" id="add-extra-btn">+ Add candidate</button>
+      </p>
+    </div>
+  {% endif %}
+
+  <details>
+    <summary class="muted small">Advanced — exclude faculty from voting (sabbatical, recusal)</summary>
+    <div class="faculty-grid" style="margin-top:0.5rem">
+      {% for m in all_faculty %}
+        <label class="fcard" style="cursor:pointer">
+          <input type="checkbox" name="excluded_oids" value="{{ m.id }}"
+                 style="margin:0 0.5rem 0 0;width:auto">
+          {% if m.photo %}
+            <img class="photo" src="/photos/{{ m.photo }}" alt="">
+          {% else %}
+            <div class="bubble">{{ m.initials }}</div>
+          {% endif %}
+          <div class="body">
+            <div class="name">{{ m.name }}</div>
+            <div class="rank">{{ m.rank }}</div>
+          </div>
+        </label>
+      {% endfor %}
+    </div>
+  </details>
+
+  <p style="margin-top:1.25rem">
+    <button class="btn primary" type="submit">Create vote</button>
+    <a class="btn ghost" href="/">Cancel</a>
+  </p>
+</form>
+
+{# Hidden row template — cloned by JS when the user clicks "+ Add candidate". #}
+<template id="extra-row-template">
+  <div class="extra-row card" style="margin:0.5rem 0">
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:0.5rem;align-items:end">
+      <label class="field" style="margin:0">
+        <span class="lbl small">Name</span>
+        <input type="text" data-field="name" maxlength="120" placeholder="Jane Q. Candidate">
+      </label>
+      <label class="field" style="margin:0">
+        <span class="lbl small">Role / affiliation (optional)</span>
+        <input type="text" data-field="rank" maxlength="80" placeholder="Asst. Prof., MIT">
+      </label>
+      <button type="button" class="btn ghost remove-extra"
+              style="color:var(--umass-red)">Remove</button>
+    </div>
+    <label class="field" style="margin:0.5rem 0 0">
+      <span class="lbl small">Photo (optional, jpg/png, max 5 MB)</span>
+      <input type="file" data-field="photo" accept="image/*">
+    </label>
+  </div>
+</template>
+
+<script>
+(function() {
+  const select = document.getElementById('template-select');
+  const customPool = document.getElementById('custom-pool');
+  if (!customPool) return;  // spawned-from-parent flow
+
+  function refresh() {
+    const t = select.value;
+    customPool.style.display = (t === 'custom_ranked' || t === 'custom_approval') ? '' : 'none';
+  }
+  select.addEventListener('change', refresh);
+  refresh();
+
+  const container = document.getElementById('extras-container');
+  const tmpl = document.getElementById('extra-row-template');
+  let idx = 0;
+
+  document.getElementById('add-extra-btn').addEventListener('click', () => {
+    const node = tmpl.content.cloneNode(true);
+    const row = node.querySelector('.extra-row');
+    row.querySelectorAll('[data-field]').forEach(el => {
+      const f = el.dataset.field;
+      el.name = `extra_${f}_${idx}`;
+    });
+    row.querySelector('.remove-extra').addEventListener('click', () => row.remove());
+    container.appendChild(node);
+    idx++;
+  });
+})();
+</script>
+{% endblock %}

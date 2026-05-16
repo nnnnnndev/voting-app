@@ -1,0 +1,387 @@
+:root {
+  /* Primary color is set from config/rules.yaml via base.html. Derived
+     variants below use color-mix() so changing --umass-red here (or in
+     base.html) propagates everywhere. */
+  --umass-red: #881c1c;
+  --umass-red-dark: color-mix(in srgb, var(--umass-red), black 25%);
+  --umass-red-soft: color-mix(in srgb, var(--umass-red) 8%, transparent);
+  --umass-red-soft-2: color-mix(in srgb, var(--umass-red) 16%, transparent);
+  --ink: #1a1a1a;
+  --ink-muted: #6b6b6b;
+  --line: #e5e5e5;
+  --line-strong: #cfcfcf;
+  --bg: #fafafa;
+  --card: #ffffff;
+  --ok: #2a7a3b;
+  --warn: #b8860b;
+  --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a { color: var(--umass-red); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.topbar {
+  background: var(--umass-red);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.topbar a { color: #fff; }
+.topbar .brand { font-weight: 600; letter-spacing: 0.02em; font-size: 1.05rem; }
+.topbar .who   { font-size: 0.9rem; opacity: 0.9; }
+
+main { max-width: 920px; margin: 1.5rem auto; padding: 0 1.25rem; }
+
+h1 { font-size: 1.6rem; margin: 0 0 0.5rem; }
+h2 { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; color: var(--ink); }
+h3 { font-size: 1.0rem; margin: 1rem 0 0.5rem; }
+
+.muted { color: var(--ink-muted); }
+.small { font-size: 0.9rem; }
+.tag {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--umass-red-soft);
+  color: var(--umass-red);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.tag.open   { background: #e8f3ea; color: var(--ok); }
+.tag.closed { background: #efefef; color: var(--ink-muted); }
+.tag.rank-prof    { background: var(--umass-red-soft);    color: var(--umass-red); }
+.tag.rank-assoc   { background: #eef2fb; color: #2c4caa; }
+.tag.rank-asst    { background: #fdf3e0; color: #8a5a00; }
+.tag.rank-lect    { background: #efefef; color: var(--ink-muted); }
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  background: #fff;
+  color: var(--ink);
+  border-color: var(--line-strong);
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.btn:hover { border-color: var(--ink-muted); }
+.btn.primary {
+  background: var(--umass-red);
+  color: #fff;
+  border-color: var(--umass-red);
+}
+.btn.primary:hover { background: var(--umass-red-dark); border-color: var(--umass-red-dark); }
+.btn.ghost { background: transparent; }
+.btn.danger {
+  background: #fff;
+  color: var(--umass-red);
+  border-color: var(--umass-red);
+}
+.btn.danger:hover { background: var(--umass-red-soft); }
+.btn[disabled], .btn.disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Forms */
+label.field { display: block; margin: 1rem 0; }
+label.field > span.lbl { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+input[type=text], input[type=number], textarea, select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  background: #fff;
+}
+textarea { min-height: 4rem; resize: vertical; }
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--umass-red-soft-2);
+  border-color: var(--umass-red);
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow);
+}
+.election-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.75rem 0;
+}
+.election-row .meta { color: var(--ink-muted); font-size: 0.9rem; }
+
+/* Faculty cards (used for ballots) */
+.faculty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+.fcard {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+  user-select: none;
+  align-self: start;
+  transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
+}
+.fcard:hover { border-color: var(--umass-red); }
+.fcard.selected {
+  border-color: var(--umass-red);
+  background: var(--umass-red-soft);
+  box-shadow: 0 0 0 2px var(--umass-red-soft-2);
+}
+.fcard .photo {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--umass-red-soft);
+  flex: 0 0 44px;
+}
+.fcard .bubble {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--umass-red);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 0.95rem;
+  flex: 0 0 44px;
+}
+.fcard .body { flex: 1; min-width: 0; }
+.fcard .name { font-weight: 600; line-height: 1.15;
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fcard .rank { color: var(--ink-muted); font-size: 0.82rem; }
+
+/* Rank badge on ranked-choice ballot */
+.fcard .rank-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--umass-red);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem;
+  flex: 0 0 26px;
+}
+.fcard.unranked .rank-num { display: none; }
+
+/* Current-DPC panel on the index page */
+.dpc-panel {
+  margin: 1rem 0 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+  padding: 0;
+}
+.dpc-panel > summary {
+  cursor: pointer;
+  padding: 0.85rem 1rem;
+  list-style: none;
+  font-size: 1rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dpc-panel > summary::-webkit-details-marker { display: none; }
+.dpc-panel > summary::before {
+  content: "+";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  color: var(--ink-muted);
+  font-weight: 700;
+  margin-right: 0.4rem;
+  line-height: 1;
+}
+.dpc-panel[open] > summary::before {
+  content: "-";
+  background: var(--umass-red);
+  color: #fff;
+  border-color: var(--umass-red);
+}
+.dpc-panel > summary:hover::before {
+  border-color: var(--umass-red);
+  color: var(--umass-red);
+}
+.dpc-panel[open] > summary:hover::before {
+  color: #fff;
+}
+.dpc-panel > *:not(summary) {
+  padding: 0 1rem;
+}
+.dpc-panel > *:last-child {
+  padding-bottom: 1rem;
+}
+.dpc-role {
+  margin: 0.75rem 0 0.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+}
+/* Cards inside the DPC panel are display-only; defang the click affordance. */
+.dpc-panel .fcard {
+  cursor: default;
+}
+.dpc-panel .fcard:hover {
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+}
+
+/* Ineligible card (hard-excluded by current-AY faculty status) */
+.fcard.ineligible {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #fafafa;
+}
+.fcard.ineligible:hover { border-color: var(--line); box-shadow: none; }
+.fcard.ineligible.selected {
+  /* Defensive: even if something tries to select, don't show the selected state. */
+  background: #fafafa;
+  border-color: var(--line);
+  box-shadow: none;
+}
+
+/* History toggle and panel */
+.fcard {
+  position: relative;
+}
+.history-toggle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  color: var(--ink-muted);
+  font: inherit;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.history-toggle:hover {
+  border-color: var(--umass-red);
+  color: var(--umass-red);
+}
+.history-toggle.open {
+  background: var(--umass-red);
+  color: #fff;
+  border-color: var(--umass-red);
+}
+.history-panel {
+  flex-basis: 100%;
+  width: 100%;
+  /* Extend the panel to the card's edges by undoing the card's padding,
+     then re-add inner spacing. The bottom corners round to match the card. */
+  margin: 0.55rem -0.8rem -0.65rem;
+  padding: 0.6rem 0.9rem 0.65rem;
+  background: var(--umass-red);
+  color: #fff;
+  border-radius: 0 0 var(--radius) var(--radius);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.history-panel ul {
+  margin: 0; padding-left: 1.1rem;
+  list-style: disc;
+}
+.history-panel li {
+  margin: 0.1rem 0;
+}
+.history-panel li::marker {
+  color: rgba(255, 255, 255, 0.7);
+}
+/* When a selected card has a history panel open, keep the panel red,
+   not red-tinted by the .selected state. */
+.fcard.selected .history-panel { color: #fff; }
+
+/* Yes/no choices */
+.choices { display: flex; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap; }
+.choice {
+  flex: 1; min-width: 140px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  background: #fff;
+  font-weight: 600;
+  transition: border-color 0.12s, background 0.12s;
+}
+.choice:hover { border-color: var(--umass-red); }
+.choice.selected {
+  border-color: var(--umass-red);
+  background: var(--umass-red-soft);
+  color: var(--umass-red);
+}
+
+/* Result block */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+}
+.result-grid .stat {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  text-align: center;
+}
+.result-grid .stat .n { font-size: 1.6rem; font-weight: 700; color: var(--umass-red); }
+.result-grid .stat .l { font-size: 0.85rem; color: var(--ink-muted); }
+
+.banner {
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  margin: 0.75rem 0;
+  border: 1px solid;
+}
+.banner.ok   { background: #eaf6ec; border-color: #b6d9bd; color: #1f5a2c; }
+.banner.warn { background: #fbf3df; border-color: #e9d3a0; color: #6c520a; }
+.banner.err  { background: #fbeaea; border-color: #e6b8b8; color: #6a1414; }
+
+footer.foot {
+  margin: 3rem 0 1.5rem;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  text-align: center;
+}

@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block body %}
+<p class="small"><a href="/">&larr; All votes</a></p>
+
+<h1>{{ election.title }}</h1>
+<p class="muted">
+  <span class="tag {{ 'open' if election.status == 'open' else 'closed' }}">{{ election.status }}</span>
+  &middot;
+  {{ {'yes_no':'Yes / No','approval':'Approval','ranked':'Ranked choice'}[election.ballot_type] }}
+  {% if election.ballot_type == 'ranked' %} &middot; {{ election.seats }} seat{{ 's' if election.seats != 1 else '' }}{% endif %}
+  {% if election.require_quorum %}
+    &middot; quorum required ({{ (election.quorum_fraction * 100)|round(0)|int }}% of {{ election.eligible_count }})
+  {% endif %}
+</p>
+{% if election.description %}
+  <p>{{ election.description }}</p>
+{% endif %}
+
+{% if just_voted %}
+  <div class="banner ok">Your ballot has been recorded. Thank you.</div>
+{% endif %}
+{% if error %}
+  <div class="banner err">{{ error }}</div>
+{% endif %}
+
+{% if election.status == 'open' %}
+  {% if not voter %}
+    <div class="banner warn">
+      <a href="/auth/login">Sign in</a> to cast your vote.
+    </div>
+  {% elif already_voted %}
+    <div class="banner ok">You have already voted in this vote.</div>
+  {% else %}
+    {% include "_ballot_" + election.ballot_type + ".html" %}
+  {% endif %}
+
+  {% if voter and is_creator %}
+    <hr style="margin:2rem 0;border:none;border-top:1px solid var(--line)">
+    <form method="post" action="/elections/{{ election.id }}/close"
+          onsubmit="return confirm('Close this vote and reveal results?')">
+      <button class="btn danger" type="submit">Close vote</button>
+      <span class="muted small">Only you (creator) can close this.</span>
+    </form>
+  {% endif %}
+
+{% else %}
+  <h2>Result</h2>
+  {% if election.require_quorum and not tally.quorum_met %}
+    <div class="banner warn">
+      Quorum not met: {{ tally.total_cast }} cast,
+      {{ tally.quorum_needed }} needed (of {{ tally.eligible_count }} eligible).
+    </div>
+  {% endif %}
+
+  {% if election.ballot_type == 'yes_no' %}
+    <div class="result-grid">
+      <div class="stat"><div class="n">{{ tally.yes }}</div><div class="l">Yes</div></div>
+      <div class="stat"><div class="n">{{ tally.no }}</div><div class="l">No</div></div>
+      <div class="stat"><div class="n">{{ tally.abstain }}</div><div class="l">Abstain</div></div>
+      <div class="stat"><div class="n">{{ tally.total_cast }}</div><div class="l">Total cast</div></div>
+    </div>
+    <p>
+      Outcome:
+      {% if tally.passed is none %}
+        <b>No decisive vote</b>
+      {% elif tally.passed %}
+        <b style="color:var(--ok)">Passed</b>
+      {% else %}
+        <b style="color:var(--umass-red)">Did not pass</b>
+      {% endif %}
+    </p>
+
+  {% elif election.ballot_type == 'approval' %}
+    <p class="muted small">{{ tally.total_cast }} ballots cast.</p>
+    <div class="faculty-grid">
+      {% for row in tally.ranked %}
+        {% set c = cards_by_id[row.id] %}
+        <div class="fcard">
+          {% if c.photo_url %}
+            <img class="photo" src="{{ c.photo_url }}" alt="">
+          {% else %}
+            <div class="bubble">{{ c.initials }}</div>
+          {% endif %}
+          <div class="body">
+            <div class="name">{{ c.name }}</div>
+            <div class="rank">{{ row.approvals }} approval{{ 's' if row.approvals != 1 else '' }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% if voter and is_creator and election.template_id.startswith('dpc_nomination') %}
+      <p>
+        <a class="btn primary"
+           href="/elections/new?spawn_from={{ election.id }}">
+          Create composition vote from these results &rarr;
+        </a>
+      </p>
+    {% endif %}
+
+  {% elif election.ballot_type == 'ranked' %}
+    <p class="muted small">{{ tally.total_cast }} ballots cast, {{ tally.seats }} seat{{ 's' if tally.seats != 1 else '' }}.</p>
+    <h3>Elected</h3>
+    <div class="faculty-grid">
+      {% for cid in tally.winners %}
+        {% set c = cards_by_id[cid] %}
+        {% set endorsed = tally.endorsements[cid] %}
+        {% set pct = (100 * endorsed / tally.total_cast)|round(0)|int if tally.total_cast else 0 %}
+        <div class="fcard selected">
+          {% if c.photo_url %}
+            <img class="photo" src="{{ c.photo_url }}" alt="">
+          {% else %}
+            <div class="bubble">{{ c.initials }}</div>
+          {% endif %}
+          <div class="body">
+            <div class="name">{{ c.name }}</div>
+            <div class="rank">Seat {{ loop.index }} &middot;
+              endorsed by {{ endorsed }}/{{ tally.total_cast }} ({{ pct }}%)
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <h3>Endorsement rate (all candidates)</h3>
+    <p class="muted small">
+      How many voters ranked each candidate at all. Candidates left unranked
+      were treated as "not acceptable" on those ballots.
+    </p>
+    <div class="faculty-grid">
+      {% for row in tally.endorsements_ranked %}
+        {% set c = cards_by_id[row.id] %}
+        {% set pct = (100 * row.count / tally.total_cast)|round(0)|int if tally.total_cast else 0 %}
+        <div class="fcard{% if row.id in tally.winners %} selected{% endif %}">
+          {% if c.photo_url %}
+            <img class="photo" src="{{ c.photo_url }}" alt="">
+          {% else %}
+            <div class="bubble">{{ c.initials }}</div>
+          {% endif %}
+          <div class="body">
+            <div class="name">{{ c.name }}</div>
+            <div class="rank">{{ row.count }}/{{ tally.total_cast }} ({{ pct }}%)</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <details>
+      <summary class="muted small">IRV round-by-round detail</summary>
+      <pre style="overflow:auto;background:#fff;border:1px solid var(--line);padding:0.75rem;border-radius:6px">{{ tally_json }}</pre>
+    </details>
+  {% endif %}
+
+  {% if voter and is_creator and has_extra_photos %}
+    <hr style="margin:2rem 0;border:none;border-top:1px solid var(--line)">
+    <form method="post" action="/elections/{{ election.id }}/purge-photos"
+          onsubmit="return confirm('Permanently delete uploaded candidate photos? Names and results stay.')">
+      <button class="btn danger" type="submit">Purge candidate photos</button>
+      <span class="muted small">Removes uploaded photos for external candidates. Names and results are preserved.</span>
+    </form>
+  {% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,50 @@
+{# Generic candidate card. Args:
+     c: dict with id, name, rank, initials, photo_url, eligible,
+        ineligible_reason, history (list of strings).
+     show_rank_badge: bool. #}
+{% set rank_class = {
+  'Professor': 'rank-prof',
+  'Associate Professor': 'rank-assoc',
+  'Assistant Professor': 'rank-asst',
+  'Lecturer': 'rank-lect',
+  'Senior Lecturer': 'rank-lect',
+}.get(c.rank, 'rank-lect') %}
+<div class="fcard{% if show_rank_badge %} unranked{% endif %}{% if not c.eligible %} ineligible{% endif %}"
+     data-id="{{ c.id }}"
+     {% if not c.eligible %}data-ineligible="{{ c.ineligible_reason }}"{% endif %}>
+  {% if c.photo_url %}
+    <img class="photo" src="{{ c.photo_url }}" alt="{{ c.name }}">
+  {% else %}
+    <div class="bubble" aria-hidden="true">{{ c.initials }}</div>
+  {% endif %}
+  <div class="body">
+    <div class="name">{{ c.name }}</div>
+    <div class="rank">
+      {% if c.rank %}
+        <span class="tag {{ rank_class }}">{{ c.rank }}</span>
+      {% endif %}
+      {% if c.is_chair %}
+        <span class="tag rank-prof" title="DPC Chair">Chair</span>
+      {% endif %}
+      {% if not c.eligible %}
+        <span class="tag rank-lect" title="Ineligible for this vote">{{ c.ineligible_reason }}</span>
+      {% endif %}
+    </div>
+  </div>
+  {% if c.history %}
+    <button type="button" class="history-toggle" aria-label="Show history"
+            title="Show recent activity">+</button>
+  {% endif %}
+  {% if show_rank_badge %}
+    <div class="rank-num"></div>
+  {% endif %}
+  {% if c.history %}
+    <div class="history-panel" hidden>
+      <ul>
+        {% for line in c.history %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</div>

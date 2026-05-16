@@ -1,0 +1,62 @@
+# Voting rules and branding for the department adopting this app.
+# Copy this file to config/rules.yaml and edit. See ADOPTION.md.
+
+branding:
+  app_name: "Your Voting App"
+  primary_color: "#003366"          # Your department or institution color.
+  footer_note: "Your unit  internal use  ballots stored in your SharePoint site"
+
+# Academic-year columns in your faculty status sheet, left to right. The
+# rightmost is the active AY (the year being composed in the next vote).
+ay_columns:
+  - "AY 23-24"
+  - "AY 24-25"
+  - "AY 25-26"
+  - "AY 26-27"
+
+# Status codes appearing in the status sheet. Each has a display label, a
+# hard-exclude flag, and any aliases (alternate spellings as cell text).
+statuses:
+  ADMIN:           { label: "Admin",            hard_exclude: true,  aliases: ["admin"] }
+  TP_CASE:         { label: "T/P Case",         hard_exclude: true,  aliases: ["t/p case", "tp case"] }
+  SABBATICAL:      { label: "Sabbatical",       hard_exclude: true,  aliases: ["sabbatical"] }
+  SERVED:          { label: "Served",           hard_exclude: false, aliases: ["served"] }
+  CHAIR:           { label: "Chair",            hard_exclude: false, aliases: ["chair"] }
+  ALTERNATE:       { label: "Alternate",        hard_exclude: false, aliases: ["alternate"] }
+  # Add any local statuses your committee tracks. Mark hard_exclude: true if
+  # the status prevents service for that AY.
+
+# Disambiguation map: short names in the status sheet -> full canonical name
+# in the faculty CSV. Most faculty resolve by first-name match automatically;
+# only add entries here for ambiguous cases or nicknames.
+name_aliases: {}
+
+# Election templates shown on the New Vote page.
+templates:
+  general_motion:
+    label: "General motion (Yes / No / Abstain)"
+    description: "A simple motion."
+    ballot_type: "yes_no"
+  nomination:
+    label: "Committee nomination"
+    description: "Approval ballot. Voters approve any subset of candidates."
+    ballot_type: "approval"
+    candidate_filter: "tenured"     # none | tenured | untenured | tenure_track
+  composition:
+    label: "Committee composition (ranked)"
+    description: "Ranked-choice ballot for committee composition."
+    ballot_type: "ranked"
+    seats: 5
+    max_ranks: 5
+    candidate_filter: "tenured"
+    require_quorum: true
+  custom_ranked:
+    label: "Custom  ranked choice"
+    description: "Pick the candidate pool yourself."
+    ballot_type: "ranked"
+    seats: 1
+    max_ranks: 5
+  custom_approval:
+    label: "Custom  approval"
+    description: "Pick any subset of candidates."
+    ballot_type: "approval"

@@ -1,0 +1,20 @@
+<form id="ranked-form" method="post" action="/elections/{{ election.id }}/vote"
+      data-max-ranks="{{ election.max_ranks }}">
+  <h2>Rank up to {{ election.max_ranks }} candidate{{ 's' if election.max_ranks != 1 else '' }}</h2>
+  <p class="muted small">
+    Click a card to rank (1, 2, 3…). Click again to remove.
+    Rank only the candidates you find acceptable, in order of preference.
+    <b>Unranked candidates count as "not acceptable" on your ballot.</b>
+    You may rank as few or as many as you wish.
+    <span class="ranked-note">0 ranked</span>
+  </p>
+  <div class="faculty-grid">
+    {% for c in candidates %}
+      {% with show_rank_badge=True %}
+        {% include "_card.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+  <input type="hidden" name="ranking" value="">
+  <p><button class="btn primary" type="submit">Cast vote</button></p>
+</form>

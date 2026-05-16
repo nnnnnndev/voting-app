@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}{{ branding.app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    :root {
+      --umass-red: {{ branding.primary_color }};
+    }
+  </style>
+  <script src="/static/ballot.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><a href="/">{{ branding.app_name }}</a></div>
+    <div class="who">
+      {% if voter %}
+        Signed in as <b>{{ voter.name }}</b> &middot;
+        <a href="/auth/logout">sign out</a>
+      {% else %}
+        <a href="/auth/login">Sign in</a>
+      {% endif %}
+    </div>
+  </header>
+  <main>
+    {% block body %}{% endblock %}
+  </main>
+  <footer class="foot">
+    {{ branding.footer_note }}
+  </footer>
+</body>
+</html>
