@@ -40,6 +40,9 @@ a:hover { text-decoration: underline; }
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 1;
 }
 .topbar a { color: #fff; }
 .topbar .brand { font-weight: 600; letter-spacing: 0.02em; font-size: 1.05rem; }
@@ -156,7 +159,13 @@ input:focus, textarea:focus, select:focus {
   align-self: start;
   transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
 }
-.fcard:hover { border-color: var(--umass-red); }
+.fcard:hover {
+  border-color: var(--umass-red);
+}
+.fcard:not(.ineligible):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06), 0 6px 18px rgba(0,0,0,0.05);
+}
 .fcard.selected {
   border-color: var(--umass-red);
   background: var(--umass-red-soft);
@@ -261,6 +270,7 @@ input:focus, textarea:focus, select:focus {
 .dpc-panel .fcard:hover {
   border-color: var(--line);
   box-shadow: var(--shadow);
+  transform: none;
 }
 
 /* Ineligible card (hard-excluded by current-AY faculty status) */
@@ -385,3 +395,54 @@ footer.foot {
   font-size: 0.82rem;
   text-align: center;
 }
+
+/* Progress bars (endorsement rate, quorum) */
+.bar {
+  position: relative;
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0.35rem 0 0;
+}
+.bar > .fill {
+  height: 100%;
+  background: var(--umass-red);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.bar.thin { height: 4px; }
+.bar.thick { height: 10px; }
+.bar.muted-fill > .fill { background: var(--ink-muted); }
+
+.quorum-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+.quorum-row .bar { flex: 1; }
+.quorum-row .quorum-label {
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+.bar .threshold {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--ink);
+  opacity: 0.6;
+}
+
+/* Empty state on the index page */
+.empty {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink-muted);
+}
+.empty .empty-hint { font-size: 0.9rem; margin-top: 0.25rem; }

@@ -67,7 +67,14 @@
   </div>
   {% endfor %}
 {% else %}
-  <p class="muted">No open votes.</p>
+  <div class="empty">
+    No open votes.
+    {% if voter %}
+      <div class="empty-hint">Use <b>+ New vote</b> above to create one.</div>
+    {% else %}
+      <div class="empty-hint">Sign in to create one.</div>
+    {% endif %}
+  </div>
 {% endif %}
 
 <h2>Closed</h2>
@@ -85,6 +92,9 @@
   </div>
   {% endfor %}
 {% else %}
-  <p class="muted">No closed votes.</p>
+  <div class="empty">
+    No closed votes yet.
+    <div class="empty-hint">Results appear here once a vote is closed.</div>
+  </div>
 {% endif %}
 {% endblock %}

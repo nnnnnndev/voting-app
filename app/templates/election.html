@@ -45,10 +45,24 @@
 
 {% else %}
   <h2>Result</h2>
-  {% if election.require_quorum and not tally.quorum_met %}
-    <div class="banner warn">
-      Quorum not met: {{ tally.total_cast }} cast,
-      {{ tally.quorum_needed }} needed (of {{ tally.eligible_count }} eligible).
+  {% if election.require_quorum %}
+    {% set qpct = (100 * tally.total_cast / tally.eligible_count)|round(0)|int if tally.eligible_count else 0 %}
+    {% set threshold_pct = (100 * tally.quorum_needed / tally.eligible_count)|round(0)|int if tally.eligible_count else 0 %}
+    {% if not tally.quorum_met %}
+      <div class="banner warn">
+        Quorum not met: {{ tally.total_cast }} cast,
+        {{ tally.quorum_needed }} needed (of {{ tally.eligible_count }} eligible).
+      </div>
+    {% endif %}
+    <div class="quorum-row">
+      <div class="bar thick{% if not tally.quorum_met %} muted-fill{% endif %}">
+        <div class="fill" style="width: {{ qpct }}%"></div>
+        <div class="threshold" style="left: {{ threshold_pct }}%" title="Quorum threshold"></div>
+      </div>
+      <div class="quorum-label">
+        {{ tally.total_cast }}/{{ tally.eligible_count }} cast
+        &middot; needs {{ tally.quorum_needed }}
+      </div>
     </div>
   {% endif %}
 
@@ -139,6 +153,7 @@
           <div class="body">
             <div class="name">{{ c.name }}</div>
             <div class="rank">{{ row.count }}/{{ tally.total_cast }} ({{ pct }}%)</div>
+            <div class="bar thin"><div class="fill" style="width: {{ pct }}%"></div></div>
           </div>
         </div>
       {% endfor %}
