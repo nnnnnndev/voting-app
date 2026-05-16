@@ -17,4 +17,8 @@ faculty_status.csv
 dpc history*.csv
 dpc history*.xlsx
 faculty photos/
+testcandidates/
+
+# Local agent / editor state.
+.claude/
 
