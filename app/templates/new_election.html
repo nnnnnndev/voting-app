@@ -24,6 +24,12 @@
               placeholder="Any context faculty should see before voting."></textarea>
   </label>
 
+  <label class="field">
+    <span class="lbl">Closes at (optional)</span>
+    <input type="datetime-local" name="closes_at">
+    <span class="muted small">If set, the vote auto-closes at this time and results become visible. Leave blank to close it manually.</span>
+  </label>
+
   {% if parent %}
     <div class="banner ok small">
       Candidate pool will be inherited from

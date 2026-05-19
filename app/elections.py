@@ -57,6 +57,7 @@ class Election:
     parent_election_id: str = ""  # if spawned from a prior election
     extra_candidates: list[dict] = field(default_factory=list)
     # Each extra: {"id": "ext_xxx", "name": "...", "rank": "...", "photo": "filename.jpg" | None}
+    closes_at: float = 0.0  # Unix timestamp; 0 means no scheduled close.
 
     def to_public(self) -> dict:
         d = self.to_storage()
@@ -83,6 +84,7 @@ class Election:
             "salt": self.salt,
             "parent_election_id": self.parent_election_id,
             "extra_candidates": list(self.extra_candidates),
+            "closes_at": self.closes_at,
         }
 
     @classmethod
@@ -90,6 +92,7 @@ class Election:
         d = dict(d)
         d.setdefault("extra_candidates", [])
         d.setdefault("parent_election_id", "")
+        d.setdefault("closes_at", 0.0)
         return cls(**d)
 
 
@@ -107,6 +110,7 @@ def create_election(
     parent_election_id: str = "",
     extra_candidates: list[dict] | None = None,
     election_id: str | None = None,
+    closes_at: float = 0.0,
     storage: Storage | None = None,
 ) -> Election:
     if template_id not in TEMPLATES:
@@ -148,6 +152,7 @@ def create_election(
         salt=new_election_salt(),
         parent_election_id=parent_election_id,
         extra_candidates=extras,
+        closes_at=closes_at,
     )
     s.put_election(election.id, election.to_storage())
     return election
@@ -158,12 +163,29 @@ def get_election(election_id: str, storage: Storage | None = None) -> Election:
     data = s.get_election(election_id)
     if data is None:
         raise ElectionNotFound(election_id)
-    return Election.from_storage(data)
+    election = Election.from_storage(data)
+    # Lazy auto-close: if a close time was set and is in the past, transition.
+    if (
+        election.status == "open"
+        and election.closes_at
+        and time.time() >= election.closes_at
+    ):
+        election.status = "closed"
+        s.put_election(election.id, election.to_storage())
+    return election
 
 
 def list_elections(storage: Storage | None = None) -> list[Election]:
     s = storage or get_storage()
-    return [Election.from_storage(d) for d in s.list_elections()]
+    now = time.time()
+    out: list[Election] = []
+    for d in s.list_elections():
+        e = Election.from_storage(d)
+        if e.status == "open" and e.closes_at and now >= e.closes_at:
+            e.status = "closed"
+            s.put_election(e.id, e.to_storage())
+        out.append(e)
+    return out
 
 
 def cast_vote(
@@ -215,6 +237,19 @@ def cast_vote(
     s.put_ballot(election.id, ballot_id, ballot)
     s.mark_voted(election.id, receipt)
     return ballot_id
+
+
+def delete_election(
+    election_id: str,
+    deleted_by_oid: str,
+    storage: Storage | None = None,
+) -> None:
+    """Permanently remove the election and all its data. Creator only."""
+    s = storage or get_storage()
+    election = get_election(election_id, s)
+    if election.created_by_oid and deleted_by_oid != election.created_by_oid:
+        raise NotPermitted("only the creator can delete this election")
+    s.delete_election(election.id)
 
 
 def close_election(

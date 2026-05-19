@@ -120,6 +120,56 @@ def test_ad_hoc_candidates_in_ranked_vote(storage):
     assert t["winners"] == ["ext_aaa"]
 
 
+def test_delete_election_removes_all_traces(storage):
+    e = _yn(storage)
+    elections.cast_vote(e.id, "voter-a", {"choice": "yes"}, storage=storage)
+    elections.cast_vote(e.id, "voter-b", {"choice": "no"}, storage=storage)
+    elections.close_election(e.id, "prof-1", storage=storage)
+    assert any(storage.iter_ballots(e.id))
+
+    elections.delete_election(e.id, "prof-1", storage=storage)
+
+    with pytest.raises(elections.ElectionNotFound):
+        elections.get_election(e.id, storage=storage)
+    assert not list(storage.iter_ballots(e.id))
+
+
+def test_only_creator_can_delete(storage):
+    e = _yn(storage, by="prof-1")
+    with pytest.raises(elections.NotPermitted):
+        elections.delete_election(e.id, "prof-2", storage=storage)
+    # Election still exists.
+    elections.get_election(e.id, storage=storage)
+
+
+def test_scheduled_close_auto_transitions(storage):
+    """An open election with closes_at in the past auto-closes on read."""
+    import time
+    e = elections.create_election(
+        title="Time-limited", description="", template_id="general_motion",
+        created_by_oid="prof-1", closes_at=time.time() - 1,  # already past
+        storage=storage,
+    )
+    # On a fresh read it should appear closed.
+    got = elections.get_election(e.id, storage=storage)
+    assert got.status == "closed"
+    # Casting should be rejected.
+    with pytest.raises(elections.ElectionClosed):
+        elections.cast_vote(e.id, "voter-a", {"choice": "yes"}, storage=storage)
+
+
+def test_scheduled_close_future_stays_open(storage):
+    import time
+    e = elections.create_election(
+        title="Future close", description="", template_id="general_motion",
+        created_by_oid="prof-1", closes_at=time.time() + 3600,
+        storage=storage,
+    )
+    got = elections.get_election(e.id, storage=storage)
+    assert got.status == "open"
+    elections.cast_vote(e.id, "voter-a", {"choice": "yes"}, storage=storage)
+
+
 def test_ad_hoc_round_trip(storage):
     """Extras survive a storage round-trip (write + read)."""
     extras = [{"id": "ext_x", "name": "Jane", "rank": "", "photo": None}]

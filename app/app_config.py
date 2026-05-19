@@ -22,6 +22,8 @@ class Branding:
     app_name: str = "Voting"
     primary_color: str = "#881c1c"
     footer_note: str = ""
+    logo_url: str = ""        # e.g. "/static/local/logo.png"
+    logo_height: int = 32     # pixels; tune to your lockup's aspect ratio
 
 
 @dataclass
@@ -52,6 +54,7 @@ class AppConfig:
     statuses: dict[str, StatusDef]
     name_aliases: dict[str, str]
     templates: dict[str, TemplateDef]
+    timezone: str = "America/New_York"
 
     @property
     def status_labels(self) -> dict[str, str]:
@@ -99,6 +102,8 @@ def load() -> AppConfig:
         app_name=branding_raw.get("app_name", "Voting"),
         primary_color=branding_raw.get("primary_color", "#881c1c"),
         footer_note=branding_raw.get("footer_note", ""),
+        logo_url=branding_raw.get("logo_url", ""),
+        logo_height=int(branding_raw.get("logo_height", 32)),
     )
 
     statuses_raw = raw.get("statuses", {}) or {}
@@ -122,6 +127,7 @@ def load() -> AppConfig:
         statuses=statuses,
         name_aliases=dict(raw.get("name_aliases", {})),
         templates=templates,
+        timezone=raw.get("timezone", "America/New_York"),
     )
 
 

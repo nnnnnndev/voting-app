@@ -46,6 +46,11 @@ class Storage(ABC):
     @abstractmethod
     def iter_ballots(self, election_id: str) -> Iterator[dict]: ...
 
+    @abstractmethod
+    def delete_election(self, election_id: str) -> None:
+        """Permanently remove an election and all associated data: metadata,
+        voter receipts, and ballots. Irreversible."""
+
 
 class LocalStorage(Storage):
     def __init__(self, root: Path | str = "data") -> None:
@@ -88,6 +93,16 @@ class LocalStorage(Storage):
             return
         for p in folder.glob("*.json"):
             yield json.loads(p.read_text())
+
+    def delete_election(self, election_id: str) -> None:
+        import shutil
+        meta = self.root / "elections" / f"{election_id}.json"
+        if meta.exists():
+            meta.unlink()
+        for sub in ("voters", "ballots"):
+            folder = self.root / sub / election_id
+            if folder.exists():
+                shutil.rmtree(folder)
 
 
 _storage: Storage | None = None

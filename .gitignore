@@ -22,3 +22,7 @@ testcandidates/
 # Local agent / editor state.
 .claude/
 
+# Institution-specific branding assets (logos etc.). Each adopting unit
+# drops their own files here. See ADOPTION.md.
+app/static/local/
+

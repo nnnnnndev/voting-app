@@ -15,7 +15,11 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><a href="/">{{ branding.app_name }}</a></div>
+    <div class="brand">
+      {% if not branding.logo_url %}
+        <a href="/" class="brand-text">{{ branding.app_name }}</a>
+      {% endif %}
+    </div>
     <div class="who">
       {% if voter %}
         Signed in as <b>{{ voter.name }}</b> &middot;
@@ -25,6 +29,11 @@
       {% endif %}
     </div>
   </header>
+  {% if branding.logo_url %}
+    <a href="/" class="page-logo-link" aria-label="{{ branding.app_name }} home">
+      <img src="{{ branding.logo_url }}" alt="{{ branding.app_name }}" class="page-logo">
+    </a>
+  {% endif %}
   <main>
     {% block body %}{% endblock %}
   </main>

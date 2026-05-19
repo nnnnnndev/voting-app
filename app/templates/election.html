@@ -11,6 +11,9 @@
   {% if election.require_quorum %}
     &middot; quorum required ({{ (election.quorum_fraction * 100)|round(0)|int }}% of {{ election.eligible_count }})
   {% endif %}
+  {% if election.status == 'open' and election.closes_at %}
+    &middot; closes <b>{{ fmt_dt(election.closes_at) }}</b>
+  {% endif %}
 </p>
 {% if election.description %}
   <p>{{ election.description }}</p>
@@ -36,9 +39,32 @@
 
   {% if voter and is_creator %}
     <hr style="margin:2rem 0;border:none;border-top:1px solid var(--line)">
+
+    <details {% if not election.closes_at %}{% else %}open{% endif %} style="margin-bottom:1rem">
+      <summary class="muted small" style="cursor:pointer">
+        Schedule automatic close
+        {% if election.closes_at %} (currently {{ fmt_dt(election.closes_at) }}){% endif %}
+      </summary>
+      <form method="post" action="/elections/{{ election.id }}/schedule-close"
+            style="display:flex;gap:0.5rem;align-items:flex-end;margin-top:0.5rem;flex-wrap:wrap">
+        <label class="field" style="margin:0;flex:1;min-width:220px">
+          <span class="lbl small">Close at</span>
+          <input type="datetime-local" name="closes_at" value="{{ closes_at_value }}">
+        </label>
+        <button class="btn" type="submit">Save</button>
+        {% if election.closes_at %}
+          <button class="btn ghost" type="submit" name="closes_at" value=""
+                  title="Remove the scheduled close">Clear</button>
+        {% endif %}
+      </form>
+      <p class="muted small" style="margin:0.5rem 0 0">
+        Vote auto-closes at this time and results become visible. Leave blank for manual close only.
+      </p>
+    </details>
+
     <form method="post" action="/elections/{{ election.id }}/close"
           onsubmit="return confirm('Close this vote and reveal results?')">
-      <button class="btn danger" type="submit">Close vote</button>
+      <button class="btn danger" type="submit">Close vote now</button>
       <span class="muted small">Only you (creator) can close this.</span>
     </form>
   {% endif %}
@@ -171,6 +197,15 @@
           onsubmit="return confirm('Permanently delete uploaded candidate photos? Names and results stay.')">
       <button class="btn danger" type="submit">Purge candidate photos</button>
       <span class="muted small">Removes uploaded photos for external candidates. Names and results are preserved.</span>
+    </form>
+  {% endif %}
+
+  {% if voter and is_creator %}
+    <hr style="margin:2rem 0;border:none;border-top:1px solid var(--line)">
+    <form method="post" action="/elections/{{ election.id }}/delete"
+          onsubmit="return confirm('Permanently delete this entire vote, including all ballots, receipts, and results? This cannot be undone.')">
+      <button class="btn danger" type="submit">Delete this vote permanently</button>
+      <span class="muted small">Removes the vote, ballots, receipts, and any uploaded photos. Irreversible.</span>
     </form>
   {% endif %}
 {% endif %}

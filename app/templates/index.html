@@ -61,6 +61,7 @@
         <span class="tag open">open</span>
         {{ {'yes_no':'Yes / No','approval':'Approval','ranked':'Ranked choice'}[e.ballot_type] }}
         {% if e.ballot_type == 'ranked' %} &middot; {{ e.seats }} seat{{ 's' if e.seats != 1 else '' }}{% endif %}
+        {% if e.closes_at %} &middot; closes {{ fmt_dt(e.closes_at) }}{% endif %}
       </div>
     </div>
     <a class="btn" href="/elections/{{ e.id }}">Open &rarr;</a>

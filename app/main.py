@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from . import app_config, elections, vote_assets
+from . import app_config, elections, timefmt, vote_assets
 from .anonymity import voter_receipt
 from .auth import current_voter, router as auth_router
 from .config import settings
@@ -54,6 +54,7 @@ def _ctx(request: Request, **extra) -> dict:
         "request": request,
         "voter": current_voter(request),
         "branding": app_config.load().branding,
+        "fmt_dt": timefmt.format_local,
         **extra,
     }
 
@@ -196,6 +197,11 @@ async def new_election_submit(request: Request):
     description = (form.get("description") or "").strip()
     excluded = form.getlist("excluded_oids")
     parent_id = form.get("parent_election_id", "") or ""
+    closes_at_raw = form.get("closes_at", "") or ""
+    try:
+        closes_at = timefmt.parse_datetime_local(closes_at_raw)
+    except ValueError:
+        raise HTTPException(400, f"Invalid close date/time: {closes_at_raw!r}")
 
     if template_id not in TEMPLATES:
         raise HTTPException(400, f"Unknown template: {template_id}")
@@ -255,6 +261,7 @@ async def new_election_submit(request: Request):
             parent_election_id=parent_id,
             extra_candidates=extras,
             election_id=vote_id,
+            closes_at=closes_at,
         )
     except ValueError as ex:
         raise HTTPException(400, str(ex))
@@ -300,6 +307,7 @@ def view_election(request: Request, election_id: str, voted: int = 0):
             is_creator=is_creator,
             just_voted=bool(voted),
             has_extra_photos=has_extra_photos,
+            closes_at_value=timefmt.to_datetime_local_value(e.closes_at),
             error=None,
         ),
     )
@@ -356,6 +364,39 @@ def close_election(request: Request, election_id: str):
     except elections.ElectionNotFound:
         raise HTTPException(404, "Vote not found")
     return RedirectResponse(f"/elections/{election_id}", status_code=303)
+
+
+@app.post("/elections/{election_id}/schedule-close")
+async def schedule_close(request: Request, election_id: str):
+    voter = _require_voter(request)
+    form = await request.form()
+    try:
+        e = elections.get_election(election_id)
+    except elections.ElectionNotFound:
+        raise HTTPException(404, "Vote not found")
+    if e.created_by_oid != voter["oid"]:
+        raise HTTPException(403, "Only the creator can change the close time.")
+    raw = form.get("closes_at", "") or ""
+    try:
+        e.closes_at = timefmt.parse_datetime_local(raw)
+    except ValueError:
+        raise HTTPException(400, f"Invalid close date/time: {raw!r}")
+    get_storage().put_election(e.id, e.to_storage())
+    return RedirectResponse(f"/elections/{election_id}", status_code=303)
+
+
+@app.post("/elections/{election_id}/delete")
+def delete_election(request: Request, election_id: str):
+    voter = _require_voter(request)
+    try:
+        elections.delete_election(election_id, voter["oid"])
+    except elections.NotPermitted as ex:
+        raise HTTPException(403, str(ex))
+    except elections.ElectionNotFound:
+        raise HTTPException(404, "Vote not found")
+    # Also wipe any uploaded candidate photos for this vote.
+    vote_assets.purge_photos(election_id)
+    return RedirectResponse("/", status_code=303)
 
 
 @app.post("/elections/{election_id}/purge-photos")

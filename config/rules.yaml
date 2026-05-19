@@ -2,10 +2,18 @@
 # Edit this file to customize. No code changes required for most adaptations.
 
 # Branding shown in the top bar and used as the accent color.
+# Local time zone for scheduled vote close times. Used for datetime input
+# parsing and display formatting. IANA name.
+timezone: "America/New_York"
+
 branding:
   app_name: "MIE Voting"
   primary_color: "#881c1c"          # UMass red. Pick your unit's brand color.
   footer_note: "UMass MIE  internal use  ballots stored in department SharePoint"
+  # Optional institution lockup shown in the topbar. Drop the file into
+  # app/static/local/ (which is gitignored) and reference its URL here.
+  logo_url: "/static/local/logo.png"
+  logo_height: 32
 
 # Faculty status sheet columns, left to right. The rightmost is the "active AY"
 # (the year being composed in the next vote). Add a new entry each year.

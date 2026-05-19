@@ -45,8 +45,32 @@ a:hover { text-decoration: underline; }
   z-index: 1;
 }
 .topbar a { color: #fff; }
-.topbar .brand { font-weight: 600; letter-spacing: 0.02em; font-size: 1.05rem; }
-.topbar .who   { font-size: 0.9rem; opacity: 0.9; }
+.topbar .brand {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-size: 1.05rem;
+}
+.topbar .who { font-size: 0.9rem; opacity: 0.9; }
+.brand-text { font-weight: 600; }
+
+/* Institutional lockup, full color, in the upper-left of the page below
+   the topbar. Hidden on narrow screens to avoid overlapping content. */
+.page-logo-link {
+  position: absolute;
+  top: 72px;
+  left: 1.75rem;
+  z-index: 0;
+  line-height: 0;
+}
+.page-logo {
+  display: block;
+  height: auto;
+  width: 350px;
+  max-width: 380px;
+}
+@media (max-width: 1500px) {
+  .page-logo-link { display: none; }
+}
 
 main { max-width: 920px; margin: 1.5rem auto; padding: 0 1.25rem; }
 

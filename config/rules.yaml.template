@@ -1,10 +1,16 @@
 # Voting rules and branding for the department adopting this app.
 # Copy this file to config/rules.yaml and edit. See ADOPTION.md.
 
+timezone: "America/New_York"     # IANA name. Change to your local zone.
+
 branding:
   app_name: "Your Voting App"
   primary_color: "#003366"          # Your department or institution color.
   footer_note: "Your unit  internal use  ballots stored in your SharePoint site"
+  # Optional institution lockup. Drop your logo into app/static/local/
+  # (gitignored) and set logo_url to its served path.
+  # logo_url: "/static/local/logo.png"
+  # logo_height: 32
 
 # Academic-year columns in your faculty status sheet, left to right. The
 # rightmost is the active AY (the year being composed in the next vote).
